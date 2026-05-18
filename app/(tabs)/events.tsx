@@ -4,7 +4,8 @@ Text,
 FlatList,
 StyleSheet,
 Button,
-Alert
+Alert,
+TouchableOpacity
 }
 from 'react-native';
 
@@ -22,7 +23,8 @@ from 'expo-router';
 
 import {
 
-getEvents,
+getActiveEvents,
+getPastEvents,
 deleteEvent,
 EventType
 
@@ -31,14 +33,29 @@ from '../../database';
 
 export default function Events(){
 
-const [events,setEvents]=
+const [aba,setAba]=
+useState('ativos');
+
+const [eventos,setEventos]=
 useState<EventType[]>([]);
 
 function carregar(){
 
-setEvents(
-getEvents()
+if(
+aba==='ativos'
+){
+
+setEventos(
+getActiveEvents()
 );
+
+}else{
+
+setEventos(
+getPastEvents()
+);
+
+}
 
 }
 
@@ -48,7 +65,7 @@ useCallback(()=>{
 
 carregar();
 
-},[])
+},[aba])
 
 );
 
@@ -58,9 +75,9 @@ id:number
 
 Alert.alert(
 
-'Excluir evento',
+'Excluir',
 
-'Deseja realmente excluir este evento?',
+'Deseja excluir?',
 
 [
 {
@@ -98,9 +115,65 @@ return(
 Meus Eventos
 </Text>
 
+<View style={styles.tabs}>
+
+<TouchableOpacity
+
+style={[
+
+styles.tab,
+
+aba==='ativos'
+&&
+styles.activeTab
+
+]}
+
+onPress={()=>
+setAba(
+'ativos'
+)
+}
+
+>
+
+<Text>
+Eventos
+</Text>
+
+</TouchableOpacity>
+
+<TouchableOpacity
+
+style={[
+
+styles.tab,
+
+aba==='lembrancas'
+&&
+styles.activeTab
+
+]}
+
+onPress={()=>
+setAba(
+'lembrancas'
+)
+}
+
+>
+
+<Text>
+Lembranças
+</Text>
+
+</TouchableOpacity>
+
+</View>
+
 <FlatList
 
-data={events}
+data={eventos}
 
 keyExtractor={(item)=>
 item.id.toString()
@@ -122,9 +195,9 @@ renderItem={({item})=>(
 📅 {item.date}
 </Text>
 
-<View
-style={styles.buttons}
->
+{aba==='ativos' ? (
+
+<View style={styles.buttons}>
 
 <Button
 title='Abrir'
@@ -175,6 +248,39 @@ item.id
 
 </View>
 
+):(
+
+<TouchableOpacity
+
+onPress={()=>
+
+router.push({
+
+pathname:
+'/memory-details',
+
+params:{
+id:item.id
+}
+
+})
+
+}
+
+>
+
+<Text
+style={styles.arrow}
+>
+
+➜
+
+</Text>
+
+</TouchableOpacity>
+
+)}
+
 </View>
 
 )}
@@ -201,16 +307,34 @@ fontWeight:'bold',
 marginBottom:20
 },
 
+tabs:{
+flexDirection:'row',
+marginBottom:20
+},
+
+tab:{
+flex:1,
+padding:12,
+alignItems:'center',
+borderRadius:10,
+backgroundColor:'#DDD',
+marginHorizontal:5
+},
+
+activeTab:{
+backgroundColor:'#B0C4DE'
+},
+
 card:{
 borderWidth:1,
 padding:15,
-marginBottom:15,
-borderRadius:10
+borderRadius:15,
+marginBottom:15
 },
 
 eventTitle:{
-fontSize:18,
 fontWeight:'bold',
+fontSize:18,
 marginBottom:5
 },
 
@@ -218,6 +342,11 @@ buttons:{
 marginTop:10,
 flexDirection:'row',
 justifyContent:'space-between'
+},
+
+arrow:{
+fontSize:28,
+alignSelf:'flex-end'
 }
 
 });

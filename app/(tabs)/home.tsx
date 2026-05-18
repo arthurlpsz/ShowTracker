@@ -5,53 +5,141 @@ StyleSheet
 }
 from 'react-native';
 
+import {
+useFocusEffect
+}
+from 'expo-router';
+
+import {
+useState,
+useCallback
+}
+from 'react';
+
+import {
+
+getNextEvent,
+getEvents,
+getTotalPhotos,
+EventType
+
+}
+from '../../database';
+
 export default function Home(){
+
+const [evento,
+setEvento]=
+
+useState<EventType|null>(
+null
+);
+
+const [totalEventos,
+setTotalEventos]=
+useState(0);
+
+const [totalFotos,
+setTotalFotos]=
+useState(0);
+
+function carregar(){
+
+setEvento(
+getNextEvent()
+);
+
+setTotalEventos(
+getEvents().length
+);
+
+setTotalFotos(
+getTotalPhotos()
+);
+
+}
+
+useFocusEffect(
+
+useCallback(()=>{
+
+carregar();
+
+},[])
+
+);
 
 return(
 
 <View style={styles.container}>
 
-<Text style={styles.title}>
+<Text style={styles.logo}>
 🎵 ShowTracker
 </Text>
 
 <Text style={styles.subtitle}>
-Organize seus eventos
+Seus momentos em eventos
 </Text>
 
-<View style={styles.card}>
+<View style={styles.cardMain}>
 
 <Text style={styles.cardTitle}>
-📅 Eventos
+📅 Próximo Show
+</Text>
+
+{evento ? (
+
+<>
+
+<Text style={styles.eventName}>
+{evento.title}
 </Text>
 
 <Text>
-Crie eventos e registre momentos especiais.
+📍 {evento.location}
+</Text>
+
+<Text>
+🕒 {evento.date}
+</Text>
+
+</>
+
+):(
+
+<Text>
+Nenhum evento cadastrado
+</Text>
+
+)}
+
+</View>
+
+<View style={styles.row}>
+
+<View style={styles.smallCard}>
+
+<Text style={styles.number}>
+{totalEventos}
+</Text>
+
+<Text>
+Eventos
 </Text>
 
 </View>
 
-<View style={styles.card}>
+<View style={styles.smallCard}>
 
-<Text style={styles.cardTitle}>
-📍 Localização
+<Text style={styles.number}>
+{totalFotos}
 </Text>
 
 <Text>
-Detecte quando chegar ao local do evento.
+Memórias
 </Text>
 
 </View>
-
-<View style={styles.card}>
-
-<Text style={styles.cardTitle}>
-📷 Memórias
-</Text>
-
-<Text>
-Registre fotos durante o evento.
-</Text>
 
 </View>
 
@@ -66,31 +154,59 @@ StyleSheet.create({
 
 container:{
 flex:1,
-padding:20
+padding:20,
+backgroundColor:'#F3F4F6'
 },
 
-title:{
-fontSize:30,
+logo:{
+fontSize:34,
 fontWeight:'bold',
-marginBottom:5
+marginTop:20
 },
 
 subtitle:{
-fontSize:18,
+fontSize:16,
+color:'#666',
 marginBottom:25
 },
 
-card:{
-borderWidth:1,
-borderRadius:12,
-padding:15,
-marginBottom:15
+cardMain:{
+backgroundColor:'#FFF',
+padding:20,
+borderRadius:20,
+marginBottom:20,
+elevation:5
 },
 
 cardTitle:{
 fontSize:18,
 fontWeight:'bold',
-marginBottom:5
+marginBottom:10
+},
+
+eventName:{
+fontSize:22,
+fontWeight:'bold',
+marginBottom:8
+},
+
+row:{
+flexDirection:'row',
+justifyContent:'space-between'
+},
+
+smallCard:{
+backgroundColor:'#FFF',
+width:'48%',
+padding:20,
+borderRadius:20,
+alignItems:'center',
+elevation:5
+},
+
+number:{
+fontSize:30,
+fontWeight:'bold'
 }
 
 });

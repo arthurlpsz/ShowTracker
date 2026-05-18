@@ -1,23 +1,27 @@
 import * as SQLite from 'expo-sqlite';
 
 const db =
-  SQLite.openDatabaseSync(
-    'showtracker.db'
-  );
+SQLite.openDatabaseSync(
+'showtracker.db'
+);
 
-export type EventType = {
-  id:number;
-  title:string;
-  location:string;
-  latitude:number;
-  longitude:number;
-  date:string;
+export type EventType={
+
+id:number;
+title:string;
+location:string;
+latitude:number;
+longitude:number;
+date:string;
+
 };
 
-export type PhotoType = {
-  id:number;
-  event_id:number;
-  image_uri:string;
+export type PhotoType={
+
+id:number;
+event_id:number;
+image_uri:string;
+
 };
 
 export function initDatabase(){
@@ -154,9 +158,7 @@ return db.getAllSync(
 }
 
 export function getEventById(
-
 id:number
-
 ){
 
 return db.getFirstSync(
@@ -165,7 +167,7 @@ return db.getFirstSync(
 
 [id]
 
-) as EventType | null;
+) as EventType|null;
 
 }
 
@@ -257,5 +259,119 @@ return db.getAllSync(
 [eventId]
 
 ) as PhotoType[];
+
+}
+
+export function getTotalPhotos(){
+
+const fotos=
+
+db.getAllSync(
+'SELECT * FROM photos'
+);
+
+return fotos.length;
+
+}
+
+function converterData(
+dataTexto:string
+){
+
+const [data,hora]=
+dataTexto.split(' ');
+
+const [dia,mes,ano]=
+data.split('/');
+
+const [horas,minutos]=
+hora.split(':');
+
+return new Date(
+
+Number(ano),
+
+Number(mes)-1,
+
+Number(dia),
+
+Number(horas),
+
+Number(minutos)
+
+);
+
+}
+
+export function getPastEvents(){
+
+const eventos=
+getEvents();
+
+const agora=
+new Date();
+
+return eventos.filter(
+
+evento=>
+
+converterData(
+evento.date
+)<agora
+
+);
+
+}
+
+export function getActiveEvents(){
+
+const eventos=
+getEvents();
+
+const agora=
+new Date();
+
+return eventos.filter(
+
+evento=>
+
+converterData(
+evento.date
+)>=agora
+
+);
+
+}
+
+export function getNextEvent(){
+
+const eventos=
+getActiveEvents();
+
+if(
+eventos.length===0
+){
+
+return null;
+
+}
+
+eventos.sort(
+
+(a,b)=>
+
+converterData(
+a.date
+).getTime()
+
+-
+
+converterData(
+b.date
+).getTime()
+
+);
+
+return eventos[0];
 
 }
