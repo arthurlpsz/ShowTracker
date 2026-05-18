@@ -1,19 +1,18 @@
 import { useState } from 'react';
 
 import {
-View,
-Text,
-TextInput,
-Button,
-StyleSheet,
-Alert
-}
-from 'react-native';
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  Alert
+} from 'react-native';
 
-import {
-createEvent
-}
-from '../../database';
+import * as Calendar from 'expo-calendar';
+import * as Location from 'expo-location';
+
+import { createEvent } from '../../database';
 
 export default function CreateEvent(){
 
@@ -29,12 +28,48 @@ useState('');
 const [time,setTime]=
 useState('');
 
-function salvar(){
+async function adicionarCalendario(){
+
+const {status}=
+await Calendar.requestCalendarPermissionsAsync();
+
+if(status!=='granted') return;
+
+const calendars=
+await Calendar.getCalendarsAsync(
+Calendar.EntityTypes.EVENT
+);
+
+if(calendars.length===0)
+return;
+
+await Calendar.createEventAsync(
+
+calendars[0].id,
+
+{
+title,
+
+startDate:new Date(),
+
+endDate:new Date(
+new Date().getTime()
++3600000
+),
+
+location
+}
+
+);
+
+}
+
+async function salvar(){
 
 if(
-!title ||
-!location ||
-!date ||
+!title||
+!location||
+!date||
 !time
 ){
 
@@ -47,17 +82,38 @@ return;
 
 }
 
+const {granted}=
+await Location
+.requestForegroundPermissionsAsync();
+
+if(!granted){
+
+Alert.alert(
+'Erro',
+'Permissão de localização negada'
+);
+
+return;
+
+}
+
+const posicao=
+await Location
+.getCurrentPositionAsync();
+
 createEvent(
 
 title,
 location,
 
--23.55052,
--46.633308,
+posicao.coords.latitude,
+posicao.coords.longitude,
 
 `${date} ${time}`
 
 );
+
+await adicionarCalendario();
 
 Alert.alert(
 'Sucesso',
@@ -137,7 +193,7 @@ input:{
 borderWidth:1,
 padding:10,
 marginBottom:10,
-borderRadius:8
+borderRadius:10
 }
 
 });

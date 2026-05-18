@@ -1,107 +1,171 @@
 import * as SQLite from 'expo-sqlite';
 
-const db = SQLite.openDatabaseSync('showtracker.db');
+const db =
+  SQLite.openDatabaseSync(
+    'showtracker.db'
+  );
 
 export type EventType = {
-  id: number;
-  title: string;
-  location: string;
-  latitude: number;
-  longitude: number;
-  date: string;
+  id:number;
+  title:string;
+  location:string;
+  latitude:number;
+  longitude:number;
+  date:string;
 };
 
-export function initDatabase() {
+export type PhotoType = {
+  id:number;
+  event_id:number;
+  image_uri:string;
+};
 
-  db.execSync(`
+export function initDatabase(){
 
-    CREATE TABLE IF NOT EXISTS users(
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT,
-      password TEXT
-    );
+db.execSync(`
 
-    CREATE TABLE IF NOT EXISTS events(
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT,
-      location TEXT,
-      latitude REAL,
-      longitude REAL,
-      date TEXT
-    );
+CREATE TABLE IF NOT EXISTS users(
 
-  `);
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+username TEXT,
+
+password TEXT
+
+);
+
+CREATE TABLE IF NOT EXISTS events(
+
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+title TEXT,
+
+location TEXT,
+
+latitude REAL,
+
+longitude REAL,
+
+date TEXT
+
+);
+
+CREATE TABLE IF NOT EXISTS photos(
+
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+event_id INTEGER,
+
+image_uri TEXT
+
+);
+
+`);
 
 }
 
 export function createUser(
-  username: string,
-  password: string
-) {
 
-  db.runSync(
-    'INSERT INTO users(username,password) VALUES (?,?)',
-    [username, password]
-  );
+username:string,
+password:string
+
+){
+
+db.runSync(
+
+`
+INSERT INTO users
+(username,password)
+VALUES (?,?)
+`,
+
+[
+username,
+password
+]
+
+);
 
 }
 
 export function loginUser(
-  username: string,
-  password: string
-) {
 
-  return db.getFirstSync(
-    'SELECT * FROM users WHERE username=? AND password=?',
-    [username, password]
-  );
+username:string,
+password:string
+
+){
+
+return db.getFirstSync(
+
+`
+SELECT *
+FROM users
+WHERE username=?
+AND password=?
+`,
+
+[
+username,
+password
+]
+
+);
 
 }
 
 export function createEvent(
-  title: string,
-  location: string,
-  latitude: number,
-  longitude: number,
-  date: string
-) {
 
-  db.runSync(
+title:string,
+location:string,
+latitude:number,
+longitude:number,
+date:string
 
-    `
-      INSERT INTO events
-      (title,location,latitude,longitude,date)
-      VALUES (?,?,?,?,?)
-    `,
+){
 
-    [
-      title,
-      location,
-      latitude,
-      longitude,
-      date
-    ]
+db.runSync(
 
-  );
+`
+INSERT INTO events
+(title,location,latitude,longitude,date)
+VALUES (?,?,?,?,?)
+`,
+
+[
+title,
+location,
+latitude,
+longitude,
+date
+]
+
+);
 
 }
 
-export function getEvents(): EventType[] {
+export function getEvents(){
 
-  return db.getAllSync(
-    'SELECT * FROM events'
-  ) as EventType[];
+return db.getAllSync(
+
+'SELECT * FROM events'
+
+) as EventType[];
 
 }
 
 export function getEventById(
-  id: number
-): EventType | null {
 
-  return db.getFirstSync(
-    'SELECT * FROM events WHERE id=?',
-    [id]
-  ) as EventType | null;
+id:number
+
+){
+
+return db.getFirstSync(
+
+'SELECT * FROM events WHERE id=?',
+
+[id]
+
+) as EventType | null;
 
 }
 
@@ -121,11 +185,13 @@ db.runSync(
 `
 UPDATE events
 SET
+
 title=?,
 location=?,
 latitude=?,
 longitude=?,
 date=?
+
 WHERE id=?
 `,
 
@@ -147,8 +213,49 @@ id:number
 ){
 
 db.runSync(
+
 'DELETE FROM events WHERE id=?',
+
 [id]
+
 );
+
+}
+
+export function savePhoto(
+
+eventId:number,
+uri:string
+
+){
+
+db.runSync(
+
+`
+INSERT INTO photos
+(event_id,image_uri)
+VALUES (?,?)
+`,
+
+[
+eventId,
+uri
+]
+
+);
+
+}
+
+export function getPhotos(
+eventId:number
+){
+
+return db.getAllSync(
+
+'SELECT * FROM photos WHERE event_id=?',
+
+[eventId]
+
+) as PhotoType[];
 
 }

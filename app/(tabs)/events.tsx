@@ -58,9 +58,9 @@ id:number
 
 Alert.alert(
 
-'Excluir',
+'Excluir evento',
 
-'Deseja realmente excluir?',
+'Deseja realmente excluir este evento?',
 
 [
 {
@@ -70,6 +70,8 @@ text:'Cancelar'
 {
 text:'Excluir',
 
+style:'destructive',
+
 onPress:()=>{
 
 deleteEvent(
@@ -78,9 +80,7 @@ id
 
 carregar();
 
-},
-
-style:'destructive'
+}
 
 }
 
@@ -125,6 +125,24 @@ renderItem={({item})=>(
 <View
 style={styles.buttons}
 >
+
+<Button
+title='Abrir'
+onPress={()=>
+
+router.push({
+
+pathname:
+'/event-details',
+
+params:{
+id:item.id
+}
+
+})
+
+}
+/>
 
 <Button
 title='Editar'
@@ -185,14 +203,14 @@ marginBottom:20
 
 card:{
 borderWidth:1,
-borderRadius:10,
 padding:15,
-marginBottom:15
+marginBottom:15,
+borderRadius:10
 },
 
 eventTitle:{
-fontWeight:'bold',
 fontSize:18,
+fontWeight:'bold',
 marginBottom:5
 },
 
