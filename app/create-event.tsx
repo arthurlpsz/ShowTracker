@@ -137,13 +137,36 @@ const posicao=
 await Location
 .getCurrentPositionAsync();
 
+const locais=
+
+await Location.geocodeAsync(
+location
+);
+
+if(locais.length===0){
+
+Alert.alert(
+'Erro',
+'Endereço não encontrado'
+);
+
+return;
+
+}
+
+const latitude=
+locais[0].latitude;
+
+const longitude=
+locais[0].longitude;
+
 createEvent(
 
 title,
 location,
 
-posicao.coords.latitude,
-posicao.coords.longitude,
+latitude,
+longitude,
 
 `${date} ${time}`
 

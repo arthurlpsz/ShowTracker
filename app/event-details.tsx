@@ -116,10 +116,40 @@ await Location
 if(!granted)
 return;
 
+const minhaPosicao=
+
 await Location
 .getCurrentPositionAsync();
 
-setPerto(true);
+const minhaLatitude=
+minhaPosicao.coords.latitude;
+
+const minhaLongitude=
+minhaPosicao.coords.longitude;
+
+const distancia=
+
+Math.sqrt(
+
+Math.pow(
+minhaLatitude-
+(event.latitude||0),
+2
+)
+
++
+
+Math.pow(
+minhaLongitude-
+(event.longitude||0),
+2
+)
+
+);
+
+setPerto(
+distancia<0.01
+);
 
 }
 
@@ -186,7 +216,7 @@ return(
 {!perto ? (
 
 <Text style={styles.message}>
-Obtendo localização...
+Você precisa estar próximo ao evento
 </Text>
 
 ):(
