@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import {
 View,
 Text,
@@ -11,63 +9,68 @@ Alert
 from 'react-native';
 
 import {
-createEvent
+useLocalSearchParams,
+router
 }
-from '../../database';
+from 'expo-router';
 
-export default function CreateEvent(){
+import {
+useState
+}
+from 'react';
+
+import {
+getEventById,
+updateEvent
+}
+from '../database';
+
+export default function EditEvent(){
+
+const {id}=
+useLocalSearchParams();
+
+const event=
+getEventById(
+Number(id)
+);
 
 const [title,setTitle]=
-useState('');
+useState(
+event?.title || ''
+);
 
 const [location,setLocation]=
-useState('');
+useState(
+event?.location || ''
+);
 
 const [date,setDate]=
-useState('');
-
-const [time,setTime]=
-useState('');
+useState(
+event?.date || ''
+);
 
 function salvar(){
 
-if(
-!title ||
-!location ||
-!date ||
-!time
-){
+updateEvent(
 
-Alert.alert(
-'Erro',
-'Preencha todos os campos'
-);
-
-return;
-
-}
-
-createEvent(
-
+Number(id),
 title,
 location,
 
 -23.55052,
 -46.633308,
 
-`${date} ${time}`
+date
 
 );
 
 Alert.alert(
 'Sucesso',
-'Evento criado'
+'Evento atualizado'
 );
 
-setTitle('');
-setLocation('');
-setDate('');
-setTime('');
+router.back();
 
 }
 
@@ -76,39 +79,29 @@ return(
 <View style={styles.container}>
 
 <Text style={styles.title}>
-Novo Evento
+Editar Evento
 </Text>
 
 <TextInput
-placeholder='Nome do evento'
 style={styles.input}
 value={title}
 onChangeText={setTitle}
 />
 
 <TextInput
-placeholder='Local'
 style={styles.input}
 value={location}
 onChangeText={setLocation}
 />
 
 <TextInput
-placeholder='Data (DD/MM/AAAA)'
 style={styles.input}
 value={date}
 onChangeText={setDate}
 />
 
-<TextInput
-placeholder='Horário (20:00)'
-style={styles.input}
-value={time}
-onChangeText={setTime}
-/>
-
 <Button
-title='Salvar Evento'
+title='Salvar alterações'
 onPress={salvar}
 />
 
@@ -137,7 +130,7 @@ input:{
 borderWidth:1,
 padding:10,
 marginBottom:10,
-borderRadius:8
+borderRadius:10
 }
 
 });

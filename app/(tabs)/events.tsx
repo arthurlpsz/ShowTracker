@@ -2,14 +2,11 @@ import {
 View,
 Text,
 FlatList,
-StyleSheet
+StyleSheet,
+Button,
+Alert
 }
 from 'react-native';
-
-import {
-useFocusEffect
-}
-from 'expo-router';
 
 import {
 useState,
@@ -18,8 +15,17 @@ useCallback
 from 'react';
 
 import {
+router,
+useFocusEffect
+}
+from 'expo-router';
+
+import {
+
 getEvents,
+deleteEvent,
 EventType
+
 }
 from '../../database';
 
@@ -28,18 +34,61 @@ export default function Events(){
 const [events,setEvents]=
 useState<EventType[]>([]);
 
+function carregar(){
+
+setEvents(
+getEvents()
+);
+
+}
+
 useFocusEffect(
 
 useCallback(()=>{
 
-const data=
-getEvents();
-
-setEvents(data);
+carregar();
 
 },[])
 
 );
+
+function confirmarExcluir(
+id:number
+){
+
+Alert.alert(
+
+'Excluir',
+
+'Deseja realmente excluir?',
+
+[
+{
+text:'Cancelar'
+},
+
+{
+text:'Excluir',
+
+onPress:()=>{
+
+deleteEvent(
+id
+);
+
+carregar();
+
+},
+
+style:'destructive'
+
+}
+
+]
+
+);
+
+}
 
 return(
 
@@ -73,6 +122,41 @@ renderItem={({item})=>(
 📅 {item.date}
 </Text>
 
+<View
+style={styles.buttons}
+>
+
+<Button
+title='Editar'
+onPress={()=>
+
+router.push({
+
+pathname:
+'/edit-event',
+
+params:{
+id:item.id
+}
+
+})
+
+}
+/>
+
+<Button
+title='Excluir'
+onPress={()=>
+
+confirmarExcluir(
+item.id
+)
+
+}
+/>
+
+</View>
+
 </View>
 
 )}
@@ -101,14 +185,21 @@ marginBottom:20
 
 card:{
 borderWidth:1,
+borderRadius:10,
 padding:15,
-marginBottom:10,
-borderRadius:10
+marginBottom:15
 },
 
 eventTitle:{
+fontWeight:'bold',
 fontSize:18,
-fontWeight:'bold'
+marginBottom:5
+},
+
+buttons:{
+marginTop:10,
+flexDirection:'row',
+justifyContent:'space-between'
 }
 
 });

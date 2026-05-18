@@ -105,13 +105,50 @@ export function getEventById(
 
 }
 
-export function deleteEvent(
-  id: number
-) {
+export function updateEvent(
 
-  db.runSync(
-    'DELETE FROM events WHERE id=?',
-    [id]
-  );
+id:number,
+title:string,
+location:string,
+latitude:number,
+longitude:number,
+date:string
+
+){
+
+db.runSync(
+
+`
+UPDATE events
+SET
+title=?,
+location=?,
+latitude=?,
+longitude=?,
+date=?
+WHERE id=?
+`,
+
+[
+title,
+location,
+latitude,
+longitude,
+date,
+id
+]
+
+);
+
+}
+
+export function deleteEvent(
+id:number
+){
+
+db.runSync(
+'DELETE FROM events WHERE id=?',
+[id]
+);
 
 }
