@@ -79,14 +79,16 @@ calendars[0].id,
 
 title,
 
-location,
-
 startDate:new Date(),
 
 endDate:new Date(
 new Date().getTime()
 +3600000
-)
+),
+
+notes:`Evento registrado no ShowTracker: ${title}`,
+
+location
 
 }
 

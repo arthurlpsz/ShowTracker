@@ -6,6 +6,11 @@ useSafeAreaInsets
 from 'react-native-safe-area-context';
 
 import {
+Ionicons
+}
+from '@expo/vector-icons';
+
+import {
 COLORS
 }
 from '../../constants/theme';
@@ -19,7 +24,7 @@ return(
 
 <Tabs
 
-screenOptions={{
+screenOptions={({route})=>({
 
 headerShown:false,
 
@@ -44,42 +49,84 @@ tabBarActiveTintColor:
 COLORS.neon,
 
 tabBarInactiveTintColor:
-COLORS.subText
+COLORS.subText,
 
-}}
+tabBarLabelStyle:{
+fontSize:12,
+fontWeight:'600'
+},
+
+tabBarIcon:({
+
+color,
+size
+
+})=>{
+
+let iconName:
+any;
+
+switch(route.name){
+
+case 'home':
+iconName='home';
+break;
+
+case 'events':
+iconName='calendar';
+break;
+
+case 'memories':
+iconName='images';
+break;
+
+case 'profile':
+iconName='person';
+break;
+
+default:
+iconName='ellipse';
+}
+
+return(
+
+<Ionicons
+name={iconName}
+size={size}
+color={color}
+/>
+
+);
+
+}
+
+})}
 
 >
 
 <Tabs.Screen
-name='home'
+name="home"
 options={{
 title:'Início'
 }}
 />
 
 <Tabs.Screen
-name='events'
+name="events"
 options={{
 title:'Eventos'
 }}
 />
 
 <Tabs.Screen
-name='memories'
+name="memories"
 options={{
 title:'Memórias'
 }}
 />
 
 <Tabs.Screen
-name='create-event'
-options={{
-title:'Criar'
-}}
-/>
-
-<Tabs.Screen
-name='profile'
+name="profile"
 options={{
 title:'Perfil'
 }}
