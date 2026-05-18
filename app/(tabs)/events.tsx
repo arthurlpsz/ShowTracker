@@ -3,17 +3,11 @@ View,
 Text,
 FlatList,
 StyleSheet,
-Button,
+TouchableOpacity,
 Alert,
-TouchableOpacity
+Image
 }
 from 'react-native';
-
-import {
-useState,
-useCallback
-}
-from 'react';
 
 import {
 router,
@@ -22,52 +16,54 @@ useFocusEffect
 from 'expo-router';
 
 import {
+useState,
+useCallback
+}
+from 'react';
+
+import {
+Ionicons
+}
+from '@expo/vector-icons';
+
+import {
 
 getActiveEvents,
-getPastEvents,
 deleteEvent,
 EventType
 
 }
 from '../../database';
 
-export default function Events(){
+import {
+COLORS
+}
+from '../../constants/theme';
 
-const [aba,setAba]=
-useState('ativos');
+export default function Events(){
 
 const [eventos,setEventos]=
 useState<EventType[]>([]);
-
-function carregar(){
-
-if(
-aba==='ativos'
-){
-
-setEventos(
-getActiveEvents()
-);
-
-}else{
-
-setEventos(
-getPastEvents()
-);
-
-}
-
-}
 
 useFocusEffect(
 
 useCallback(()=>{
 
-carregar();
+setEventos(
+getActiveEvents()
+);
 
-},[aba])
+},[])
 
 );
+
+function atualizar(){
+
+setEventos(
+getActiveEvents()
+);
+
+}
 
 function confirmarExcluir(
 id:number
@@ -75,9 +71,9 @@ id:number
 
 Alert.alert(
 
-'Excluir',
+'Excluir evento',
 
-'Deseja excluir?',
+'Deseja excluir este evento?',
 
 [
 {
@@ -95,7 +91,7 @@ deleteEvent(
 id
 );
 
-carregar();
+atualizar();
 
 }
 
@@ -111,60 +107,34 @@ return(
 
 <View style={styles.container}>
 
+<View style={styles.header}>
+
 <Text style={styles.title}>
 Meus Eventos
 </Text>
 
-<View style={styles.tabs}>
-
 <TouchableOpacity
 
-style={[
-
-styles.tab,
-
-aba==='ativos'
-&&
-styles.activeTab
-
-]}
+style={styles.addButton}
 
 onPress={()=>
-setAba(
-'ativos'
+
+router.push(
+'/create-event'
 )
+
 }
 
 >
 
-<Text>
-Eventos
-</Text>
+<Ionicons
+name='add'
+size={20}
+color='#FFF'
+/>
 
-</TouchableOpacity>
-
-<TouchableOpacity
-
-style={[
-
-styles.tab,
-
-aba==='lembrancas'
-&&
-styles.activeTab
-
-]}
-
-onPress={()=>
-setAba(
-'lembrancas'
-)
-}
-
->
-
-<Text>
-Lembranças
+<Text style={styles.addText}>
+Adicionar
 </Text>
 
 </TouchableOpacity>
@@ -172,6 +142,8 @@ Lembranças
 </View>
 
 <FlatList
+
+showsVerticalScrollIndicator={false}
 
 data={eventos}
 
@@ -183,24 +155,36 @@ renderItem={({item})=>(
 
 <View style={styles.card}>
 
+<Image
+
+source={
+require(
+'../../assets/event-placeholder.jpg'
+)
+}
+
+style={styles.banner}
+
+/>
+
 <Text style={styles.eventTitle}>
 {item.title}
 </Text>
 
-<Text>
+<Text style={styles.info}>
 📍 {item.location}
 </Text>
 
-<Text>
+<Text style={styles.info}>
 📅 {item.date}
 </Text>
 
-{aba==='ativos' ? (
-
 <View style={styles.buttons}>
 
-<Button
-title='Abrir'
+<TouchableOpacity
+
+style={styles.actionButton}
+
 onPress={()=>
 
 router.push({
@@ -215,10 +199,26 @@ id:item.id
 })
 
 }
+
+>
+
+<Ionicons
+name='eye-outline'
+size={18}
+color='#FFF'
 />
 
-<Button
-title='Editar'
+<Text style={styles.actionText}>
+Abrir
+</Text>
+
+</TouchableOpacity>
+
+
+<TouchableOpacity
+
+style={styles.actionButton}
+
 onPress={()=>
 
 router.push({
@@ -233,10 +233,26 @@ id:item.id
 })
 
 }
+
+>
+
+<Ionicons
+name='create-outline'
+size={18}
+color='#FFF'
 />
 
-<Button
-title='Excluir'
+<Text style={styles.actionText}>
+Editar
+</Text>
+
+</TouchableOpacity>
+
+
+<TouchableOpacity
+
+style={styles.deleteButton}
+
 onPress={()=>
 
 confirmarExcluir(
@@ -244,42 +260,22 @@ item.id
 )
 
 }
+
+>
+
+<Ionicons
+name='trash-outline'
+size={18}
+color='#EF4444'
 />
 
-</View>
-
-):(
-
-<TouchableOpacity
-
-onPress={()=>
-
-router.push({
-
-pathname:
-'/memory-details',
-
-params:{
-id:item.id
-}
-
-})
-
-}
-
->
-
-<Text
-style={styles.arrow}
->
-
-➜
-
+<Text style={styles.deleteText}>
+Excluir
 </Text>
 
 </TouchableOpacity>
 
-)}
+</View>
 
 </View>
 
@@ -298,55 +294,148 @@ StyleSheet.create({
 
 container:{
 flex:1,
-padding:20
+padding:20,
+backgroundColor:COLORS.background
+},
+
+header:{
+flexDirection:'row',
+justifyContent:'space-between',
+alignItems:'center',
+marginBottom:25
 },
 
 title:{
-fontSize:28,
+fontSize:32,
 fontWeight:'bold',
-marginBottom:20
+color:COLORS.text
 },
 
-tabs:{
+addButton:{
+
+backgroundColor:
+COLORS.primary,
+
+paddingHorizontal:15,
+paddingVertical:10,
+
+borderRadius:15,
+
 flexDirection:'row',
-marginBottom:20
+alignItems:'center'
+
 },
 
-tab:{
-flex:1,
-padding:12,
-alignItems:'center',
-borderRadius:10,
-backgroundColor:'#DDD',
-marginHorizontal:5
-},
-
-activeTab:{
-backgroundColor:'#B0C4DE'
+addText:{
+marginLeft:5,
+color:'#FFF',
+fontWeight:'bold'
 },
 
 card:{
-borderWidth:1,
+
+backgroundColor:
+COLORS.card,
+
 padding:15,
-borderRadius:15,
+
+borderRadius:25,
+
+marginBottom:20,
+
+borderWidth:1,
+
+borderColor:
+COLORS.border
+
+},
+
+banner:{
+
+width:'100%',
+height:130,
+
+borderRadius:18,
+
 marginBottom:15
+
 },
 
 eventTitle:{
+fontSize:24,
 fontWeight:'bold',
-fontSize:18,
+color:COLORS.text,
+marginBottom:10
+},
+
+info:{
+fontSize:15,
+color:COLORS.subText,
 marginBottom:5
 },
 
 buttons:{
-marginTop:10,
+marginTop:18,
 flexDirection:'row',
 justifyContent:'space-between'
 },
 
-arrow:{
-fontSize:28,
-alignSelf:'flex-end'
+actionButton:{
+
+width:'31%',
+
+backgroundColor:
+'rgba(124,58,237,0.25)',
+
+paddingVertical:12,
+
+borderRadius:14,
+
+justifyContent:'center',
+alignItems:'center',
+
+flexDirection:'row',
+
+borderWidth:1,
+
+borderColor:
+'rgba(124,58,237,0.35)'
+
+},
+
+deleteButton:{
+
+width:'31%',
+
+backgroundColor:
+'rgba(239,68,68,0.15)',
+
+paddingVertical:12,
+
+borderRadius:14,
+
+justifyContent:'center',
+alignItems:'center',
+
+flexDirection:'row',
+
+borderWidth:1,
+
+borderColor:
+'rgba(239,68,68,0.25)'
+
+},
+
+actionText:{
+marginLeft:6,
+color:'#FFF',
+fontWeight:'600'
+},
+
+deleteText:{
+marginLeft:6,
+color:'#EF4444',
+fontWeight:'600'
 }
 
 });

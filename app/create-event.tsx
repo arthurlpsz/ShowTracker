@@ -14,11 +14,8 @@ useState
 }
 from 'react';
 
-import {
-router,
-useLocalSearchParams
-}
-from 'expo-router';
+import * as Calendar from 'expo-calendar';
+import * as Location from 'expo-location';
 
 import {
 Ionicons
@@ -26,10 +23,12 @@ Ionicons
 from '@expo/vector-icons';
 
 import {
+router
+}
+from 'expo-router';
 
-getEventById,
-updateEvent
-
+import {
+createEvent
 }
 from '../database';
 
@@ -38,55 +37,72 @@ COLORS
 }
 from '../constants/theme';
 
-export default function EditEvent(){
-
-const {id}=
-useLocalSearchParams();
-
-const evento=
-getEventById(
-Number(id)
-);
-
-const dataCompleta=
-evento?.date || '';
-
-const partes=
-dataCompleta.split(' ');
-
-const data=
-partes[0] || '';
-
-const horario=
-partes[1] || '';
+export default function CreateEvent(){
 
 const [title,setTitle]=
-useState(
-evento?.title || ''
-);
+useState('');
 
 const [location,setLocation]=
-useState(
-evento?.location || ''
-);
+useState('');
 
 const [date,setDate]=
-useState(
-data
-);
+useState('');
 
 const [time,setTime]=
-useState(
-horario
+useState('');
+
+async function adicionarCalendario(){
+
+const {status}=
+
+await Calendar
+.requestCalendarPermissionsAsync();
+
+if(status!=='granted')
+return;
+
+const calendars=
+
+await Calendar
+.getCalendarsAsync(
+Calendar.EntityTypes.EVENT
 );
 
-function salvar(){
+if(calendars.length===0)
+return;
+
+await Calendar.createEventAsync(
+
+calendars[0].id,
+
+{
+
+title,
+
+location,
+
+startDate:new Date(),
+
+endDate:new Date(
+new Date().getTime()
++3600000
+)
+
+}
+
+);
+
+}
+
+async function salvar(){
 
 if(
-!title ||
-!location ||
-!date ||
+
+!title||
+!location||
+!date||
 !time
+
 ){
 
 Alert.alert(
@@ -98,23 +114,44 @@ return;
 
 }
 
-updateEvent(
+const {granted}=
 
-Number(id),
+await Location
+.requestForegroundPermissionsAsync();
+
+if(!granted){
+
+Alert.alert(
+'Erro',
+'Permissão de localização negada'
+);
+
+return;
+
+}
+
+const posicao=
+
+await Location
+.getCurrentPositionAsync();
+
+createEvent(
 
 title,
 location,
 
-evento?.latitude || 0,
-evento?.longitude || 0,
+posicao.coords.latitude,
+posicao.coords.longitude,
 
 `${date} ${time}`
 
 );
 
+await adicionarCalendario();
+
 Alert.alert(
 'Sucesso',
-'Evento atualizado'
+'Evento criado'
 );
 
 router.back();
@@ -124,34 +161,18 @@ router.back();
 return(
 
 <ScrollView
+
 style={styles.container}
 showsVerticalScrollIndicator={false}
->
-
-<TouchableOpacity
-
-style={styles.backButton}
-
-onPress={()=>
-router.back()
-}
 
 >
-
-<Ionicons
-name="arrow-back"
-size={25}
-color={COLORS.text}
-/>
-
-</TouchableOpacity>
 
 <View style={styles.header}>
 
 <View style={styles.iconContainer}>
 
 <Ionicons
-name="create"
+name="add-circle"
 size={35}
 color="#FFF"
 />
@@ -159,11 +180,11 @@ color="#FFF"
 </View>
 
 <Text style={styles.title}>
-Editar Evento
+Novo Evento
 </Text>
 
 <Text style={styles.subtitle}>
-Atualize as informações
+Registre seu próximo show
 </Text>
 
 </View>
@@ -179,11 +200,17 @@ color={COLORS.neon}
 />
 
 <TextInput
+
 placeholder='Nome do evento'
-placeholderTextColor={COLORS.subText}
+placeholderTextColor={
+COLORS.subText
+}
+
 style={styles.input}
+
 value={title}
 onChangeText={setTitle}
+
 />
 
 </View>
@@ -198,11 +225,17 @@ color={COLORS.neon}
 />
 
 <TextInput
+
 placeholder='Local'
-placeholderTextColor={COLORS.subText}
+placeholderTextColor={
+COLORS.subText
+}
+
 style={styles.input}
+
 value={location}
 onChangeText={setLocation}
+
 />
 
 </View>
@@ -217,11 +250,17 @@ color={COLORS.neon}
 />
 
 <TextInput
+
 placeholder='Data (15/01/2026)'
-placeholderTextColor={COLORS.subText}
+placeholderTextColor={
+COLORS.subText
+}
+
 style={styles.input}
+
 value={date}
 onChangeText={setDate}
+
 />
 
 </View>
@@ -236,11 +275,17 @@ color={COLORS.neon}
 />
 
 <TextInput
+
 placeholder='Horário (18:00)'
-placeholderTextColor={COLORS.subText}
+placeholderTextColor={
+COLORS.subText
+}
+
 style={styles.input}
+
 value={time}
 onChangeText={setTime}
+
 />
 
 </View>
@@ -255,7 +300,7 @@ onPress={salvar}
 >
 
 <Text style={styles.buttonText}>
-Salvar Alterações
+Criar Evento
 </Text>
 
 </TouchableOpacity>
@@ -277,26 +322,32 @@ backgroundColor:COLORS.background,
 padding:20
 },
 
-backButton:{
-marginTop:20,
-marginBottom:20
-},
-
 header:{
 alignItems:'center',
+marginTop:25,
 marginBottom:30
 },
 
 iconContainer:{
+
 width:90,
 height:90,
+
 borderRadius:50,
-backgroundColor:COLORS.primary,
+
+backgroundColor:
+COLORS.primary,
+
 justifyContent:'center',
 alignItems:'center',
+
 borderWidth:2,
-borderColor:COLORS.neon,
+
+borderColor:
+COLORS.neon,
+
 marginBottom:15
+
 },
 
 title:{
@@ -311,22 +362,41 @@ color:COLORS.subText
 },
 
 card:{
-backgroundColor:COLORS.card,
+
+backgroundColor:
+COLORS.card,
+
 padding:25,
+
 borderRadius:30,
+
 borderWidth:1,
-borderColor:COLORS.border
+
+borderColor:
+COLORS.border
+
 },
 
 inputContainer:{
+
 flexDirection:'row',
+
 alignItems:'center',
-backgroundColor:COLORS.cardHighlight,
+
+backgroundColor:
+COLORS.cardHighlight,
+
 paddingHorizontal:15,
+
 borderRadius:18,
+
 marginBottom:18,
+
 borderWidth:1,
-borderColor:COLORS.border
+
+borderColor:
+COLORS.border
+
 },
 
 input:{
@@ -337,11 +407,18 @@ color:COLORS.text
 },
 
 button:{
-backgroundColor:COLORS.primary,
+
+backgroundColor:
+COLORS.primary,
+
 padding:18,
+
 borderRadius:20,
+
 alignItems:'center',
+
 marginTop:10
+
 },
 
 buttonText:{

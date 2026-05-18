@@ -3,14 +3,27 @@ View,
 Text,
 StyleSheet,
 Image,
-ScrollView
+ScrollView,
+TouchableOpacity
 }
 from 'react-native';
 
 import {
-useLocalSearchParams
+useLocalSearchParams,
+router
 }
 from 'expo-router';
+
+import {
+useEffect,
+useState
+}
+from 'react';
+
+import {
+Ionicons
+}
+from '@expo/vector-icons';
 
 import {
 
@@ -22,10 +35,9 @@ PhotoType
 from '../database';
 
 import {
-useEffect,
-useState
+COLORS
 }
-from 'react';
+from '../constants/theme';
 
 export default function MemoryDetails(){
 
@@ -37,30 +49,18 @@ getEventById(
 Number(id)
 );
 
-const [fotos,
-setFotos]=
-
-useState<PhotoType[]>(
-[]
-);
+const [fotos,setFotos]=
+useState<PhotoType[]>([]);
 
 useEffect(()=>{
 
-carregarFotos();
-
-},[]);
-
-function carregarFotos(){
-
 setFotos(
-
 getPhotos(
 Number(id)
 )
-
 );
 
-}
+},[]);
 
 if(!event){
 
@@ -68,7 +68,9 @@ return(
 
 <View style={styles.center}>
 
-<Text>
+<Text style={{
+color:COLORS.text
+}}>
 Evento não encontrado
 </Text>
 
@@ -78,73 +80,106 @@ Evento não encontrado
 
 }
 
+const capa=
+
+fotos.length>0
+
+?
+
+{
+uri:
+fotos[0].image_uri
+}
+
+:
+
+require(
+'../assets/event-placeholder.jpg'
+);
+
 return(
 
-<View style={styles.container}>
+<ScrollView
+style={styles.container}
+showsVerticalScrollIndicator={false}
+>
+
+<TouchableOpacity
+
+style={styles.backButton}
+
+onPress={()=>
+router.back()
+}
+
+>
+
+<Ionicons
+name="arrow-back"
+size={24}
+color="#FFF"
+/>
+
+</TouchableOpacity>
+
+<Image
+
+source={capa}
+
+style={styles.banner}
+
+/>
+
+<View style={styles.infoCard}>
 
 <Text style={styles.title}>
 {event.title}
 </Text>
 
-<Text>
+<Text style={styles.info}>
 📍 {event.location}
 </Text>
 
-<Text>
+<Text style={styles.info}>
 📅 {event.date}
 </Text>
 
-<Text style={styles.subtitle}>
-Memórias
+</View>
+
+<Text style={styles.sectionTitle}>
+Momentos registrados
 </Text>
-
-{fotos.length===0 ? (
-
-<Text>
-Nenhuma foto registrada
-</Text>
-
-):(
-
-<ScrollView
-horizontal
-showsHorizontalScrollIndicator={
-false
-}
->
 
 {fotos.map(
 
 foto=>(
 
+<View
+
+key={foto.id}
+
+style={styles.photoCard}
+
+>
+
 <Image
 
-key={
-foto.id
-}
-
 source={{
-
 uri:
 foto.image_uri
-
 }}
 
-style={
-styles.image
-}
+style={styles.image}
 
 />
+
+</View>
 
 )
 
 )}
 
 </ScrollView>
-
-)}
-
-</View>
 
 );
 
@@ -155,31 +190,101 @@ StyleSheet.create({
 
 container:{
 flex:1,
-padding:20
+backgroundColor:COLORS.background
 },
 
 center:{
 flex:1,
 justifyContent:'center',
-alignItems:'center'
+alignItems:'center',
+backgroundColor:COLORS.background
+},
+
+backButton:{
+
+position:'absolute',
+
+top:50,
+left:20,
+
+zIndex:10,
+
+backgroundColor:
+'rgba(0,0,0,0.4)',
+
+padding:10,
+
+borderRadius:30
+
+},
+
+banner:{
+width:'100%',
+height:250
+},
+
+infoCard:{
+
+margin:20,
+
+backgroundColor:
+COLORS.card,
+
+padding:20,
+
+borderRadius:25,
+
+marginTop:-40,
+
+borderWidth:1,
+
+borderColor:
+COLORS.border
+
 },
 
 title:{
 fontSize:28,
-fontWeight:'bold'
+fontWeight:'bold',
+color:COLORS.text
 },
 
-subtitle:{
+info:{
+marginTop:10,
+color:COLORS.subText
+},
+
+sectionTitle:{
 fontSize:20,
 fontWeight:'bold',
-marginVertical:20
+color:COLORS.text,
+marginHorizontal:20,
+marginBottom:15
+},
+
+photoCard:{
+
+marginHorizontal:20,
+marginBottom:20,
+
+backgroundColor:
+COLORS.card,
+
+padding:8,
+
+borderRadius:20,
+
+borderWidth:1,
+
+borderColor:
+COLORS.border
+
 },
 
 image:{
-width:250,
+width:'100%',
 height:300,
-borderRadius:15,
-marginRight:15
+borderRadius:15
 }
 
 });
